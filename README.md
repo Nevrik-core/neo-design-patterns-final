@@ -59,8 +59,8 @@ src/models/ResumeModel.ts
 ```
 export interface Certificate { title: string; issuer: string; year: string; }
 export interface ResumeModel {
-// ...
-certificates?: Certificate[];
+    // ...
+    certificates?: Certificate[];
 }
 ```
 
@@ -72,21 +72,31 @@ import { IBlock } from "./BlockFactory";
 import { Certificate } from "../models/ResumeModel";
 
 export class CertificatesBlock implements IBlock {
-constructor(private items: Certificate[]) {}
-render(): HTMLElement {
-const sec = document.createElement("section");
-sec.className = "section certificates";
-sec.innerHTML = "<h2>Certificates</h2>";
-const ul = document.createElement("ul");
-this.items.forEach(c => {
-const li = document.createElement("li");
-li.textContent = `${c.title} — ${c.issuer} (${c.year})`;
-ul.appendChild(li);
-});
-sec.appendChild(ul);
-return sec;
+  constructor(private items: Certificate[] = []) {}
+
+  render(): HTMLElement {
+    const sec = document.createElement("section");
+    sec.className = "section certificates";
+    sec.innerHTML = "<h2>Certificates</h2>";
+
+    if (!this.items.length) return sec;
+
+    const ul = document.createElement("ul");
+    ul.className = "certificates-list";
+
+    [...this.items]
+      .sort((a, b) => (b.year || "").localeCompare(a.year || ""))
+      .forEach(c => {
+        const li = document.createElement("li");
+        li.textContent = `${c.title} — ${c.issuer} (${c.year})`;
+        ul.appendChild(li);
+      });
+
+    sec.appendChild(ul);
+    return sec;
+  }
 }
-}
+
 ```
 
 Додайте гілку у фабрику
@@ -97,7 +107,7 @@ export type BlockType = "header" | "summary" | "experience" | "education" | "ski
 
 // у switch:
 case "certificates":
-return new CertificatesBlock((m as ResumeModel).certificates ?? []);
+    return new CertificatesBlock((m as ResumeModel).certificates ?? []);
 
 ```
 
@@ -106,7 +116,7 @@ src/importer/ResumeImporter.ts (у render() після інших блоків):
 
 ```
 if (model.certificates?.length) {
-root.appendChild(factory.createBlock("certificates", model).render());
+    root.appendChild(factory.createBlock("certificates", model).render());
 }
 ```
 
@@ -114,7 +124,7 @@ root.appendChild(factory.createBlock("certificates", model).render());
 
 ```
 "certificates": [
-{ "title": "AWS Certified Cloud Practitioner", "issuer": "AWS", "year": "2024" }
+    { "title": "AWS Certified Cloud Practitioner", "issuer": "AWS", "year": "2024" }
 ]
 ```
 
