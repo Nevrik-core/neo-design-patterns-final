@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.tsbuildinfo
+.DS_Store
+.idea/
+.vscode/
+*.code-workspace
+npm-debug.log*
